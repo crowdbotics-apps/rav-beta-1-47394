@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.generic.base import TemplateView
@@ -34,9 +33,9 @@ urlpatterns = [
     path("rest-auth/registration/", include("dj_rest_auth.registration.urls")),
 ]
 
-admin.site.site_header = "Testing"
-admin.site.site_title = "Testing Admin Portal"
-admin.site.index_title = "Testing Admin"
+admin.site.site_header = "Shipping Logistics"
+admin.site.site_title = "Shipping Logistics Admin Portal"
+admin.site.index_title = "Shipping Logistics Admin"
 
 # swagger
 urlpatterns += [
@@ -46,3 +45,36 @@ urlpatterns += [
 
 
 urlpatterns += [re_path(r".*",TemplateView.as_view(template_name='index.html'))]
+
+
+from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
+from django.contrib.auth.models import Group, User
+from django.contrib.sites.models import Site
+from rest_framework.authtoken.models import Token
+
+# Unregister the Site model
+try:
+    admin.site.unregister(Site)
+except admin.sites.NotRegistered:
+    pass  # In case the Site model is not registered, this will pass silently
+
+# Unregister the Token model
+try:
+    admin.site.unregister(Token)
+except admin.sites.NotRegistered:
+    pass  # In case the Token model is not registered, this will pass silently
+
+admin.site.unregister(SocialToken)
+admin.site.unregister(SocialAccount)
+admin.site.unregister(SocialApp)
+admin.site.unregister(EmailAddress)
+
+admin.site.unregister(Group)
+try:
+    from rest_framework.authtoken.models import TokenProxy as DRFToken
+except ImportError:
+    from rest_framework.authtoken.models import Token as DRFToken
+
+admin.site.unregister(DRFToken)
+

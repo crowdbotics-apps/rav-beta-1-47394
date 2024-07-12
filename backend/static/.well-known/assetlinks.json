@@ -1,0 +1,16 @@
+[
+  {
+      "relation": [
+          "delegate_permission/common.handle_all_urls"
+      ],
+      "target": {
+          "namespace": "android_app",
+          "package_name": "com.shipping_logistics",
+          "sha256_cert_fingerprints": [
+              "8A:36:54:01:52:1C:D0:E4:64:77:62:B6:B8:A3:6B:43:BF:A4:39:8D:B0:D8:56:7E:4D:5A:3E:98:EC:CC:C0:D1",
+              "BD:8F:22:A5:14:2B:D9:86:2A:D2:DE:B0:DB:95:55:6C:04:19:F6:70:B8:6F:EA:36:F4:0F:04:30:16:8E:47:6A",
+              "2D:85:97:99:41:4F:5B:A8:1E:6A:CF:3F:CE:32:77:41:26:AE:80:D2:E7:BC:40:42:7C:A7:94:30:9D:86:06:6A"
+          ]
+      }
+  }
+]
