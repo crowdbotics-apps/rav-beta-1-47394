@@ -17,7 +17,11 @@ import logging
 import json
 import base64
 import binascii
+
+import firebase_admin
+
 import google.auth
+from firebase_admin import credentials
 from google.oauth2 import service_account
 from google.cloud import secretmanager
 from google.auth.exceptions import DefaultCredentialsError
@@ -73,6 +77,7 @@ INSTALLED_APPS = [
 LOCAL_APPS = [
     'home',
     'users.apps.UsersConfig',
+    'backoffice',
 ]
 THIRD_PARTY_APPS = [
     'rest_framework',
@@ -88,6 +93,8 @@ THIRD_PARTY_APPS = [
     'drf_spectacular',
     'storages',
     'import_export',
+    'corsheaders',
+    'django_filters',
 ]
 MODULES_APPS = get_modules()
 
@@ -101,8 +108,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = 'testing_47394.urls'
 
 TEMPLATES = [
@@ -122,6 +132,17 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'testing_47394.wsgi.application'
+
+FCM_SERVER_KEY = env.str("FCM_SERVER_KEY", "")
+FCM_JSON_FILE = os.path.join(
+    BASE_DIR, "tradaill-firebase-adminsdk-ivcwm-1f5476b5e4.json"
+)
+# https://shippinglogistics-default-rtdb.firebaseio.com/
+
+cred = credentials.Certificate(FCM_JSON_FILE)
+firebase_admin.initialize_app(
+    cred, {"databaseURL": "https://tradaill-default-rtdb.firebaseio.com/"}
+)
 
 
 # Database
@@ -182,7 +203,10 @@ AUTHENTICATION_BACKENDS = (
 )
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'), os.path.join(BASE_DIR, 'web_build')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, "web_build", "static"),
+]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/mediafiles/'
@@ -202,6 +226,13 @@ SOCIALACCOUNT_ADAPTER = "users.adapters.SocialAccountAdapter"
 ACCOUNT_ALLOW_REGISTRATION = env.bool("ACCOUNT_ALLOW_REGISTRATION", True)
 SOCIALACCOUNT_ALLOW_REGISTRATION = env.bool("SOCIALACCOUNT_ALLOW_REGISTRATION", True)
 
+GOOGLE_CLIENT_ID = env.str("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = env.str("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = env.str("GOOGLE_REDIRECT_URI", "")
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {"SCOPE": ["profile", "email"], "AUTH_PARAMS": {"access_type": "online"}}
+}
+
 REST_AUTH = {
     # Replace password reset serializer to fix 500 error
     "PASSWORD_RESET_SERIALIZER": "home.api.v1.serializers.PasswordSerializer",
@@ -211,6 +242,12 @@ REST_AUTH = {
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
 }
 
 # Custom user model
@@ -221,6 +258,15 @@ EMAIL_HOST_USER = env.str("SENDGRID_USERNAME", "")
 EMAIL_HOST_PASSWORD = env.str("SENDGRID_PASSWORD", "")
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+FROM_EMAIL = env.str("EMAIL", "")
+RESET_URL = env.str("RESET_URL", "")
+
+FORGOT_PASSWORD = {
+    "EMAIL_SUBJECT": "Reset Password",
+    "TOKEN_DURATION": 1800,
+}
+PASSWORD_RESET_TIMEOUT = 259200  # 3 days in seconds 259200
 
 
 # AWS S3 config
@@ -245,6 +291,7 @@ if USE_S3:
     DEFAULT_FILE_STORAGE = env.str(
         "DEFAULT_FILE_STORAGE", "home.storage_backends.MediaStorage"
     )
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
 
 SPECTACULAR_SETTINGS = {
     # available SwaggerUI configuration parameters
