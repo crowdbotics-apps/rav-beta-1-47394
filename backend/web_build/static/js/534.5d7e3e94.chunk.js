@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkreact_nest_auth=self.webpackChunkreact_nest_auth||[]).push([[534],{4534:(e,t,s)=>{s.r(t),s.d(t,{Home:()=>a});var n=s(4414);const a=()=>(0,n.jsx)("h1",{children:"Home Component"})}}]);

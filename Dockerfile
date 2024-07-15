@@ -8,7 +8,7 @@ RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
 FROM node:18.16-alpine AS rn_web_build
 WORKDIR /tmp/web_build
 COPY . .
-RUN yarn install && yarn run web:build
+#RUN yarn install && yarn run web:build
 
 
 FROM crowdbotics/cb-django:3.8-slim-buster AS release
